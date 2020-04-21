@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
     setuptools.setup(
         name='markdown-tree',  
-        version='0.1',
+        version='0.1.1',
         scripts=['markdown_tree'] ,
         author="Jiaming Lu",
         author_email="jiaminglu@live.com",
