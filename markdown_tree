@@ -112,7 +112,7 @@ def generate_markdown_tree(directory, ignore="", header="", footer="", prefixes=
     if output:
         Path(output).write_text(text)
     else:
-        print(output)
+        print(text)
 
 
 if __name__ == "__main__":
