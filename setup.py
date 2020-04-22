@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
     setuptools.setup(
         name='markdown-tree',  
-        version='0.1.3',
+        version='0.1.4',
         scripts=['markdown_tree'] ,
         author="Jiaming Lu",
         author_email="jiaminglu@live.com",
@@ -18,4 +18,7 @@ with open("README.md", "r") as fh:
           'Operating System :: OS Independent',
           'Programming Language :: Python :: 3',
         ],
+        install_requires=[
+          'click',
+        ]
     )
