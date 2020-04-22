@@ -27,12 +27,13 @@ IGNORED_FILES = [".*"]
 
 
 class MarkdownTreeGenerator(object):
-    def __init__(self, dir, ignore, header, footer, prefixes):
+    def __init__(self, dir, ignore, header, footer, emoji, prefixes):
         self.dir = dir
         self.ignore = ignore
         self.header = header
         self.footer = footer
         self.prefixes = prefixes
+        self.emoji = emoji
 
     def generate(self):
         if self.header:
@@ -46,8 +47,14 @@ class MarkdownTreeGenerator(object):
 
     def walk(self, dir, level):
         for entry in sorted(self.iterdir(dir)):
-                
-            line = self.markdown_prefix(level).format(self.link(entry.name, quote(str(entry))))
+            content = self.link(entry.name, quote(str(entry)))
+
+            emoji = self.get_emoji(entry)
+            if emoji:
+                content = '{} {}'.format(emoji, content)
+
+            line = self.markdown_prefix(level).format(content)
+
             if entry.is_file():
                 yield line
 
@@ -80,16 +87,26 @@ class MarkdownTreeGenerator(object):
     def link(self, text, href):
         return '[{}]({})'.format(text, href)
 
+    def get_emoji(self, entry):
+        if not self.emoji:
+            return None
+        if entry.is_file():
+            return '📄'
+        if entry.is_dir():
+            return '📁'
+        return None
+
 
 @click.command()
 @click.argument("directory", type=click.Path(exists=True), default=".")
 @click.option("--ignore", type=str, default=','.join(IGNORED_FILES), help="Ignored files or dirs, comma separated, default=.*")
 @click.option("--header", type=str, default=MARKDOWN_HEADER, help="Header")
 @click.option("--footer", type=str, default=MARKDOWN_FOOTER, help="Footer")
+@click.option("--emoji/--no-emoji", default=False, help="Enable file/folder emoji")
 @click.option("--prefixes", type=str, default=','.join(MARKDOWN_PREFIX), help="Prefixes, default='## {},- {}', which means, top level entries are <h2> and the rest are <ul>")
 @click.option("-c", "--config", type=click.Path(exists=False), default=".mdtreeconfig.json", help="Load all configs from a json file if exists, default=.mdtreeconfig.json")
 @click.option("-o", "--output", type=click.Path(exists=False), default=None, help="Output filename, default is stardard output")
-def generate_markdown_tree(directory, ignore="", header="", footer="", prefixes="", config="", output=None):
+def generate_markdown_tree(directory, ignore="", header="", footer="", emoji=False, prefixes="", config="", output=None):
     directory = Path(directory)
     options = {}
     if config and (directory / config).exists():
@@ -100,6 +117,8 @@ def generate_markdown_tree(directory, ignore="", header="", footer="", prefixes=
         options['header'] = header
     if 'footer' not in options:
         options['footer'] = footer
+    if 'emoji' not in options:
+        options['emoji'] = emoji
     if 'prefixes' not in options:
         options['prefixes'] = prefixes.split(',')
     if 'output' not in options:
